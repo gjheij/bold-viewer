@@ -1,0 +1,12 @@
+name: viewer
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - pyside6
+  - pyqtgraph
+  - nibabel
+  - numpy
+  - pip
+  - pip:
+      - .

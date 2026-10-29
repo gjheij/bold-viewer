@@ -9,6 +9,14 @@ FSL and fmriproc are not required to view existing results.
 
 Extract this repository and open a terminal in its top-level directory.
 
+### Conda
+
+```bash
+conda env create --file environment.yml
+conda activate viewer
+call_viewer
+```
+
 ### Windows / PowerShell
 
 Use 64-bit [Python 3.12 from python.org](https://www.python.org/downloads/windows/).
