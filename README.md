@@ -11,11 +11,37 @@ Extract this repository and open a terminal in its top-level directory.
 
 ### Windows / PowerShell
 
+Use 64-bit [Python 3.12 from python.org](https://www.python.org/downloads/windows/).
+Python 3.10 or newer is supported; Python 3.12 is the setup example below.
+In a new PowerShell window, inspect the available installations:
+
 ```powershell
-python -m venv .venv
+py -0p
+```
+
+Check that the Python 3.12 path is outside Anaconda/Miniconda, then run:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install .
+.\.venv\Scripts\python.exe -c "from PySide6 import QtCore; print(QtCore.__version__)"
 .\.venv\Scripts\call_viewer.exe
 ```
+
+If `py -3.12` is unavailable, install official Python 3.12 first. If the launcher
+selects a Conda installation, use the full path to the official interpreter:
+
+```powershell
+& "C:\path\to\Python312\python.exe" -m venv .venv
+```
+
+Replace that example path with the actual installed Python path. Creating a
+venv with bare `python` while Conda is active uses that Conda interpreter as its
+base. Deactivating Conda afterwards does not change the venv's base interpreter.
+If `.venv` already exists and was created from Conda, use a new directory such
+as `.venv-clean` and substitute that name in all subsequent commands. Keep the
+old environment until the new one works.
 
 No PowerShell activation-policy changes are needed. To pass an image:
 
@@ -60,6 +86,31 @@ pipx install "git+https://github.com/gjheij/bold-viewer.git"
 ```
 
 Use pipx's PATH setup instructions if your shell cannot find the command.
+
+## Windows troubleshooting: QtCore DLL import failure
+
+If startup reports `DLL load failed while importing QtCore`, the failure occurs
+before any image or FEAT data is loaded. A DLL conflict, inconsistent PySide6
+installation or Windows runtime issue is possible; this message alone does not
+identify the cause. `pip check` verifies dependency metadata, not DLL loading.
+
+Inspect the Python installation and Qt packages:
+
+```powershell
+.\.venv\Scripts\python.exe -c "import sys, platform; print(sys.executable); print(sys.base_prefix); print(platform.platform()); print(platform.machine())"
+.\.venv\Scripts\python.exe -m pip show PySide6 PySide6-Essentials PySide6-Addons shiboken6
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -c "from PySide6 import QtCore; print(QtCore.__version__)"
+```
+
+If `sys.base_prefix` points to Anaconda or Miniconda, try the fresh official
+Python environment described above. This is a way to isolate the problem,
+not proof that Conda caused the failure. Qt's pip wheels include Qt binaries;
+a separate Qt installation is not required.
+
+If the Qt import still fails in a fresh environment, include these command
+outputs when reporting the issue. Do not change FEAT files to troubleshoot an
+import failure.
 
 ## Usage
 
@@ -111,8 +162,15 @@ extracted project directory, run:
 git init -b main
 git add .
 git commit -m "Package BOLD and FEAT viewer"
-git remote add origin https://github.com/gjheij/bold-viewer.git
+git remote add origin git@github.com:gjheij/bold-viewer.git
 git push -u origin main
+```
+
+This example uses SSH and assumes a GitHub SSH key is configured. If an
+existing remote uses HTTPS but you authenticate with an SSH key, switch it:
+
+```bash
+git remote set-url origin git@github.com:gjheij/bold-viewer.git
 ```
 
 Update the remote if using a different account or repository. GitHub Actions
